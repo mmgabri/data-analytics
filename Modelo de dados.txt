@@ -1,0 +1,132 @@
+---------------------------------------------------------
+ AUTORIZADOR DEBITO - RELATÓRIO DE TRANSAÇÕES PROCESSADAS
+---------------------------------------------------------
+
+DATA BASE: 07/07/2025
+
+GERAL
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:
+ 
+MODERNIZADO
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:
+  
+LEGADO
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:  
+  
+MASTERCARD
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:  
+  
+VISA
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:  
+  
+MASTERCARD - MODERNIZADO
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:  
+  
+MASTERCARD - LEGADO
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:    
+  
+VISA - MODERNIZADO
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:  
+  
+AUTORIZADOR PRESENTE
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:      
+  
+  
+ AUTORIZADOR DIGITAL
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:     
+  
+AUTORIZADOR LEGADO
+  - Quantidade: 
+  - Valor:
+  - Quantidade Negadas:
+  - Valor Negadas: 
+  - Quantidade Aprovadas:
+  - Valor Aprovadas: 
+  - Quantidade de Estornos:
+  - Quantidade de Advices:
+  - Pico TPS:       
+  
+  
+PICO ERROS:
+ -  
+  

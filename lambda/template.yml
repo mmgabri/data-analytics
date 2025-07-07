@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Analytics Autorizador Débito
+
+Globals:
+  Function:
+    Timeout: 10
+
+#------------  Parameters ------------#
+Parameters:
+  Parameter:
+    Type: String
+    Default: " "
+
+Resources:
+  
+  #------------ Topic SNS ------------#
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: "AlertInstanceEC2"
+      TopicName: "send-email-analytics"
+
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SNSTopic
+      Protocol: email
+      Endpoint: "marcelomgabriel@gmail.com"
+
+
+  #------------ Lambda Function ------------#
+  DataAnalyticsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "data-analytics"
+      CodeUri:  ./FunctionAnalytics
+      Handler: data-analytics.lambda_handler
+      Runtime: python3.13
+      MemorySize: 128
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref SNSTopic
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: "sns:Publish"
+              Resource: !Ref SNSTopic
