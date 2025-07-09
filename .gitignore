@@ -4,9 +4,3 @@
 # Ignorar os arquivos SAM
 **/.aws-sam/
 **/samconfig.toml
-
-# Ignorar tudo na pasta FunctionHealth
-**/FunctionHealth/*
-
-# Exceto o arquivo agilfacil-health.py
-!FunctionHealth/agilfacil-health.py

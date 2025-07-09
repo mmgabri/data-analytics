@@ -35,8 +35,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: "data-analytics"
-      CodeUri:  ./FunctionAnalytics
-      Handler: data-analytics.lambda_handler
+      CodeUri: .
+      Handler: FunctionAnalytics.data_analytics.lambda_handler
       Runtime: python3.13
       MemorySize: 128
       Environment:
