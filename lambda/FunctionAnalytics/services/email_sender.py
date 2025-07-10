@@ -7,19 +7,33 @@ from typing import Union
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# largura máxima de cada coluna (sem contar os dois espaços de padding do template)
-COLUMN_WIDTHS = {
-    'b': 9,   # QTD
-    'c': 16,   # Valor
-    'd': 9,   # QTD NEG.
-    'e': 16,   # Valor NEG.
-    'f': 9,   # QTD APR.
-    'g': 16,   # Valor APR.
-    'h': 9,   # QTD EST.
-    'i': 9,   # QTD Advice
-    'j': 3     # TPS
+QTD_FIELDS = {"qtd", "qtd_neg", "qtd_apr", "qtd_est", "qtd_adv"}
+VALOR_FIELDS = {"valor", "valor_neg", "valor_apr"}
+
+SPACING_CONFIG = {
+    "qtd": {
+        1: 23,
+        2: 21,
+        3: 19,
+        5: 16,
+        6: 13,
+        7: 11,
+        9: 8,
+       10: 6,
+       11: 3,
+    },
+    "valor": {
+        7: 25,
+        8: 22,
+        9: 20,
+       11: 16,
+       12: 14,
+       13: 12,
+       15: 8,
+       16: 6,
+       17: 4,
+    },
 }
-FIGURE_SPACE = "\u2007"
 
 class SnsEmailSender:
     def __init__(self, topic_arn: str, template_path: str = "table_template.txt"):    
@@ -58,29 +72,20 @@ class SnsEmailSender:
             cents = 0
 
         reais = cents / 100
-        s = f"{reais:,.2f}"            # ex: "100,000,000.12"
+        s = f"{reais:,.2f}"            # "100,000,000.12"
         s = s.replace(",", "X")        # "100X000X000X12"
-        s = s.replace(".", ",")        # "100X000X000X12,00"  (aqui o ponto original vira vírgula do decimal)
+        s = s.replace(".", ",")        # "100X000X000X12,00"  
         s = s.replace("X", ".")        # "100.000.000.12,00"
 
         return f"R$ {s}"
 
-    def build_subs2(self, rows: list[dict], start_index: int = 2) -> dict:
-        subs = {}
-        for idx, row in enumerate(rows, start=start_index):
-            subs[f"b{idx}"] = self.format_int(row["qtd"])
-            subs[f"c{idx}"] = self.format_currency(row["valor"])
-            subs[f"d{idx}"] = self.format_int(row["qtd_neg"])
-            subs[f"e{idx}"] = self.format_currency(row["valor_neg"])
-            subs[f"f{idx}"] = self.format_int(row["qtd_apr"])
-            subs[f"g{idx}"] = self.format_currency(row["valor_apr"])
-            subs[f"h{idx}"] = self.format_int(row["qtd_est"])
-            subs[f"i{idx}"] = self.format_int(row["qtd_adv"])
-            subs[f"j{idx}"] = str(row["tps"])
-        return subs
-    
+    @staticmethod
+    def pad_center(raw: str, total_spaces: int, pad_char: str) -> str:
+        left = total_spaces // 2 + (total_spaces % 2)
+        right = total_spaces // 2
+        return f"{pad_char * left}{raw}{pad_char * right}"
+     
     def build_subs(self, rows: list[dict], start_index: int = 2) -> dict:
-    #    self.test_spacing_chars(self)
         subs = {}
         for idx, row in enumerate(rows, start=start_index):
             cols = {
@@ -96,10 +101,19 @@ class SnsEmailSender:
             }
             for col_key, (field, fmt) in cols.items():
                 raw = fmt(row[field])
-                logger.info(field) #qtd/valor/qtd_neg....
-                logger.info(raw) #conteudo
-                logger.info("raw='%s' tem %d caracteres", raw, len(raw))
-                width = COLUMN_WIDTHS[col_key]
-                padded = raw.rjust(width, FIGURE_SPACE)
+                
+                if field in QTD_FIELDS:
+                    cfg = SPACING_CONFIG["qtd"]
+                elif field in VALOR_FIELDS:
+                    cfg = SPACING_CONFIG["valor"]
+                else:
+                    cfg = None
+                
+                if cfg and (n_spaces := cfg.get(len(raw))) is not None:
+                    padded = self.pad_center(raw, n_spaces, " ")
+                else:
+                    padded = raw
+                
                 subs[f"{col_key}{idx}"] = padded
-        return subs  
+
+        return subs     

@@ -24,14 +24,14 @@ class AthenaDataProvider:
         return {
         "rows": [
             {
-                "name": "GERAL", "qtd": 67, "valor": 100012,
+                "name": "GERAL", "qtd": 972023, "valor": 97202301,
                 "qtd_neg":123, "valor_neg":1000034,
                 "qtd_apr":99, "valor_apr":12345678900,
                 "qtd_est":1, "qtd_adv":0,
                 "tps":300
             },
             {
-                "name": "MODERNIZADO", "qtd": 99999,  "valor":  5500000032,
+                "name": "MODERNIZADO", "qtd": 22,  "valor":  32,
                 "qtd_neg":5000000,  "valor_neg": 4000000000,
                 "qtd_apr":4000000,  "valor_apr": 1230000000,
                 "qtd_est":1000000,  "qtd_adv": 500000,

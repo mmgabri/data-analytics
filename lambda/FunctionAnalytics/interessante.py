@@ -39,3 +39,6 @@ def lambda_handler(event, context):
         "statusCode": 200,
         "body": json.dumps({"message": "E-mail enviado via SNS"})
     }
+
+
+╔
