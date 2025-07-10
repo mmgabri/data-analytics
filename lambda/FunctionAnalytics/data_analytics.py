@@ -13,7 +13,6 @@ logger.setLevel(logging.INFO)
 # constantes de configuração
 ATHENA_DB      = "autorizador_debito"
 ATHENA_OUTPUT  = "s3://mmgabri-autorizador-debito/dados/queries-athena/"
-#TABLE_TEMPLATE = "/var/task/table_template.txt"
 TABLE_TEMPLATE = "table_template.txt"
 TOPIC_ARN      = "arn:aws:sns:us-east-1:140023369634:notification-agilfacil"
 
