@@ -1,10 +1,14 @@
-Gere um csv contendo 500 linhas contendo dados aleatórios transacionais com os campos abaixo:
-- data , no formato aaaa-mm-dd. Deve ser entre 2025-07-01 e 2025-07-05
+Gere um csv (separado por ponto e virgula) contendo 1000 linhas contendo dados aleatórios transacionais com os campos abaixo:
+- data , no formato aaaa-mm-dd. Deve ser entre 2025-07-004 e 2025-07-05
 - hora, no formato hh:mm:ss
 - valor, com 12 posicoes alinhando com zeros a esquerda (sem ponto ou virgula). Deve ser entre 1 e 100000 (1 mil  reais)
 - status, 90% "aprovado" e 10% "negado"
-- tipo 90% "financeira" , 3% "acerto", "5% "estorno" , 2% "advice"
+- tipo 90% "financeira" , 1% "acerto", "4% "estorno" , 5% "advice"
 - numero_cartao, numérico com 16 posicoes
 - nome_produto , dividir em compra_nacional_chip_senha, compra_nacional_contactless_sem_senha, compra_nacional_contactless_com_senha
 - codigo_erro , numérico com 3 posicoes . Se status aprovado, deve ser "000"
 - código_retorno, numerico com 2 posicoes. Se status aprovado, deve ser "00"
+- bandeira, deve ser MASTERCARD (70%) e VISA (30%)
+- transaction_id, gerar um uuid randômico
+- data_hora no formatado 2025-07-11T11:53:46Z. A data deve corresponder (ser igual) ao outro campo data
+- reason_code variando entre 402, 490 e 120. Incluir isso apenas para somente  transações do tipo estorno ou advice. 

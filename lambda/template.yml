@@ -19,7 +19,7 @@ Resources:
   SNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      DisplayName: "AlertInstanceEC2"
+      DisplayName: "Transaction Data Analytics"
       TopicName: "send-email-analytics"
 
   EmailSubscription:
@@ -27,7 +27,7 @@ Resources:
     Properties:
       TopicArn: !Ref SNSTopic
       Protocol: email
-      Endpoint: "marcelomgabriel@gmail.com"
+      Endpoint: "marcelomgabriel.agilfacil@outlook.com"
 
 
   #------------ Lambda Function ------------#

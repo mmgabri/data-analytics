@@ -1,48 +1,47 @@
 import boto3
 import logging
 from string import Template
-from pathlib import Path
-from typing import Union  
+from typing import Union
+from FunctionAnalytics.services.table_template import TABLE_TEMPLATE
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-QTD_FIELDS = {"qtd", "qtd_neg", "qtd_apr", "qtd_est", "qtd_adv"}
+QTD_FIELDS = {"qtd", "qtd_neg", "qtd_apr", "qtd_est", "qtd_adv", "tps"}
 VALOR_FIELDS = {"valor", "valor_neg", "valor_apr"}
 
+#tam x espaçamento
 SPACING_CONFIG = {
     "qtd": {
-        1: 23,
-        2: 21,
-        3: 19,
-        5: 16,
-        6: 13,
-        7: 11,
-        9: 8,
-       10: 6,
-       11: 3,
+        1: 22,
+        2: 20,
+        3: 18,
+        5: 14,
+        6: 11,
+        7: 10,
+        9: 6,
+       10: 4,
+       11: 2,
     },
     "valor": {
-        7: 25,
-        8: 22,
-        9: 20,
-       11: 16,
-       12: 14,
-       13: 12,
-       15: 8,
-       16: 6,
-       17: 4,
+        7: 21,
+        8: 18,        
+        9: 17,
+       11: 13,
+       12: 11,
+       13: 9,
+       15: 6,
+       16: 3,
+       17: 1,
     },
 }
 
-class SnsEmailSender:
-    def __init__(self, topic_arn: str, template_path: str = "table_template.txt"):    
+class SnsTransactionReportSender:
+    def __init__(self, topic_arn: str):
         self.topic_arn = topic_arn
-        self.sns = boto3.client("sns")
-        pkg_root      = Path(__file__).parent.parent
-        template_path = pkg_root / template_path
-        raw = template_path.read_text(encoding="utf-8")
-        self.template = Template(raw)
+        self.sns       = boto3.client("sns")
+        # já vem como Template diretamente
+        self.template  = Template(TABLE_TEMPLATE)
 
     def send(self, rows: list[dict]):
         logger.info("Montando corpo do email…")
@@ -85,19 +84,19 @@ class SnsEmailSender:
         right = total_spaces // 2
         return f"{pad_char * left}{raw}{pad_char * right}"
      
-    def build_subs(self, rows: list[dict], start_index: int = 2) -> dict:
+    def build_subs(self, rows: list[dict], start_index: int = 1) -> dict:
         subs = {}
         for idx, row in enumerate(rows, start=start_index):
             cols = {
-                'b': ("qtd",       self.format_int),
-                'c': ("valor",     self.format_currency),
-                'd': ("qtd_neg",   self.format_int),
-                'e': ("valor_neg", self.format_currency),
-                'f': ("qtd_apr",   self.format_int),
-                'g': ("valor_apr", self.format_currency),
-                'h': ("qtd_est",   self.format_int),
-                'i': ("qtd_adv",   self.format_int),
-                'j': ("tps",       lambda x: str(x))
+                'a': ("qtd",       self.format_int),
+                'b': ("valor",     self.format_currency),
+                'c': ("qtd_apr",   self.format_int),
+                'd': ("valor_apr", self.format_currency),
+                'e': ("qtd_neg",   self.format_int),
+                'f': ("valor_neg", self.format_currency),
+                'g': ("qtd_est",   self.format_int),
+                'h': ("qtd_adv",   self.format_int),
+                'i': ("tps",       lambda x: str(x))
             }
             for col_key, (field, fmt) in cols.items():
                 raw = fmt(row[field])
