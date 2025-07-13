@@ -1,5 +1,3 @@
-# athena_report_data_provider_service.py
-
 import logging
 import time
 from collections import defaultdict
@@ -8,98 +6,20 @@ from typing import Any, Dict
 
 import boto3
 
+from FunctionAnalytics.utils.queries_transaction_report import (
+    QUERY_PRESENTE_BY_STATUS,
+    QUERY_PRESENTE_GET_ESTORNOS,
+    QUERY_PRESENTE_GET_ADVICES,
+    QUERY_DIGITAIS_BY_STATUS,
+    QUERY_DIGITAIS_GET_ESTORNOS,
+    QUERY_DIGITAIS_GET_ADVICES,
+    QUERY_LEGADO_BY_STATUS,
+    QUERY_LEGADO_GET_ESTORNOS,
+    QUERY_LEGADO_GET_ADVICES,
+)
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-QUERY_PRESENTE_BY_STATUS = """
-SELECT bandeira, status, SUM(CAST(valor AS bigint)) AS valor_total, COUNT() as quantidade 
-FROM presente 
-WHERE 
-data = '2025-07-05' 
-GROUP BY bandeira, status
-"""
-
-QUERY_PRESENTE_GET_ESTORNOS = """
-SELECT bandeira,  tipo, SUM(CAST(valor AS bigint)) AS valor_total, COUNT() as quantidade 
-FROM presente 
-WHERE 
-data = '2025-07-05' 
-AND tipo = 'estorno'
-GROUP BY bandeira, tipo
-"""
-
-QUERY_PRESENTE_GET_ADVICES = """
-SELECT bandeira, tipo, COUNT() as quantidade, SUM(CAST(valor AS bigint)) AS valor_total 
-FROM presente 
-WHERE
-reason_code in ('402', '120' ) 
-AND tipo = 'advice' 
-AND data = '2025-07-05' 
-GROUP BY bandeira, tipo 
-"""
-
-QUERY_DIGITAIS_BY_STATUS = """
-SELECT bandeira, status, SUM(CAST(valor AS bigint)) AS valor_total, COUNT() as quantidade 
-FROM digitais 
-WHERE 
-data = '2025-07-05' 
-GROUP BY bandeira, status
-"""
-
-QUERY_DIGITAIS_GET_ESTORNOS = """
-SELECT bandeira,  tipo, SUM(CAST(valor AS bigint)) AS valor_total, COUNT() as quantidade 
-FROM digitais 
-WHERE 
-data = '2025-07-05' 
-AND tipo = 'estorno'
-GROUP BY bandeira, tipo
-"""
-
-QUERY_DIGITAIS_GET_ADVICES = """
-SELECT bandeira, tipo, COUNT() as quantidade, SUM(CAST(valor AS bigint)) AS valor_total 
-FROM digitais 
-WHERE
-reason_code in ('402', '120' ) 
-AND tipo = 'advice' 
-AND data = '2025-07-05' 
-GROUP BY bandeira, tipo 
-"""
-
-QUERY_LEGADO_BY_STATUS = """
-SELECT bandeira, status, SUM(CAST(valor AS bigint)) AS valor_total, COUNT() as quantidade 
-FROM legado 
-WHERE 
-data = '2025-07-05' 
-GROUP BY bandeira, status
-"""
-
-QUERY_LEGADO_GET_ESTORNOS = """
-SELECT bandeira,  tipo, SUM(CAST(valor AS bigint)) AS valor_total, COUNT() as quantidade 
-FROM legado 
-WHERE 
-data = '2025-07-05' 
-AND tipo = 'estorno'
-GROUP BY bandeira, tipo
-"""
-
-QUERY_LEGADO_GET_ADVICES = """
-SELECT bandeira, tipo, COUNT() as quantidade, SUM(CAST(valor AS bigint)) AS valor_total 
-FROM legado 
-WHERE
-reason_code in ('402', '120' ) 
-AND tipo = 'advice' 
-AND data = '2025-07-05' 
-GROUP BY bandeira, tipo 
-"""
-
-QUERY_PRESENTE_GET_PICO_TPS = """
-SELECT substring(data_hora, 1, 19) AS data_hora, COUNT(*) AS pico_tps
-FROM presente
-GROUP BY substring(data_hora, 1, 19)
-ORDER BY pico_tps DESC
-LIMIT 1; 
-"""
-
 
 class AthenaReportDataProvider:
     def __init__(self, database: str, output_location: str, athena_client=None):
@@ -107,12 +27,12 @@ class AthenaReportDataProvider:
         self.output_location = output_location
         self.athena = athena_client or boto3.client('athena')
 
-    def execute(self) -> dict:
+    def execute(self, date: str) -> dict:
         logger.info("Iniciando obtenção dos dados…")
 
-        dados_presente = self.__data_process(QUERY_PRESENTE_BY_STATUS, QUERY_PRESENTE_GET_ESTORNOS, QUERY_PRESENTE_GET_ADVICES)
-        dados_digitais = self.__data_process(QUERY_DIGITAIS_BY_STATUS, QUERY_DIGITAIS_GET_ESTORNOS, QUERY_DIGITAIS_GET_ADVICES)
-        dados_legado = self.__data_process(QUERY_LEGADO_BY_STATUS, QUERY_LEGADO_GET_ESTORNOS, QUERY_LEGADO_GET_ADVICES)
+        dados_presente = self.__get_data(QUERY_PRESENTE_BY_STATUS.format(dia_mes_ano=date), QUERY_PRESENTE_GET_ESTORNOS.format(dia_mes_ano=date), QUERY_PRESENTE_GET_ADVICES.format(dia_mes_ano=date))
+        dados_digitais = self.__get_data(QUERY_DIGITAIS_BY_STATUS.format(dia_mes_ano=date), QUERY_DIGITAIS_GET_ESTORNOS.format(dia_mes_ano=date), QUERY_DIGITAIS_GET_ADVICES.format(dia_mes_ano=date))
+        dados_legado = self.__get_data(QUERY_LEGADO_BY_STATUS.format(dia_mes_ano=date), QUERY_LEGADO_GET_ESTORNOS.format(dia_mes_ano=date), QUERY_LEGADO_GET_ADVICES.format(dia_mes_ano=date))
 
         return {
             "rows": [
@@ -165,7 +85,7 @@ class AthenaReportDataProvider:
                     "tps": 0
                 },
                 {
-                    "name": "MASTERCARD MODERNIZADO",
+                    "name": "MASTERCARD_MODERNIZADO",
                     "qtd": dados_presente["qtd_master"] + dados_digitais["qtd_master"],
                     "valor": dados_presente["valor_master"] + dados_digitais["valor_master"],
                     "qtd_neg": dados_presente["qtd_neg_master"] + dados_digitais["qtd_neg_master"],
@@ -177,7 +97,7 @@ class AthenaReportDataProvider:
                     "tps": 0
                 },
                 {
-                    "name": "MASTERCARD LEGADO",
+                    "name": "MASTERCARD_LEGADO",
                     "qtd": dados_legado["qtd_master"],
                     "valor": dados_legado["valor_master"],
                     "qtd_neg": dados_legado["qtd_neg_master"],
@@ -201,7 +121,7 @@ class AthenaReportDataProvider:
                     "tps": 0
                 },
                 {
-                    "name": "VISA MODERNIZADO",
+                    "name": "VISA_MODERNIZADO",
                     "qtd": dados_presente["qtd_visa"] + dados_digitais["qtd_visa"],
                     "valor": dados_presente["valor_visa"] + dados_digitais["valor_visa"],
                     "qtd_neg": dados_presente["qtd_neg_visa"] + dados_digitais["qtd_neg_visa"],
@@ -213,7 +133,7 @@ class AthenaReportDataProvider:
                     "tps": 0
                 },
                 {
-                    "name": "VISA LEGADO",
+                    "name": "VISA_LEGADO",
                     "qtd": dados_legado["qtd_visa"],
                     "valor": dados_legado["valor_visa"],
                     "qtd_neg": dados_legado["qtd_neg_visa"],
@@ -225,7 +145,7 @@ class AthenaReportDataProvider:
                     "tps": 0
                 },
                 {
-                    "name": "AUTORIZADOR PRESENTE",
+                    "name": "AUTORIZADOR_PRESENTE",
                     "qtd": dados_presente["qtd_aut"],
                     "valor": dados_presente["valor_aut"],
                     "qtd_neg": dados_presente["qtd_neg_aut"],
@@ -237,7 +157,7 @@ class AthenaReportDataProvider:
                     "tps": 0
                 },
                 {
-                    "name": "AUTORIZADOR DIGITAIS",
+                    "name": "AUTORIZADOR_DIGITAIS",
                     "qtd": dados_digitais["qtd_aut"],
                     "valor": dados_digitais["valor_aut"],
                     "qtd_neg": dados_digitais["qtd_neg_aut"],
@@ -249,7 +169,7 @@ class AthenaReportDataProvider:
                     "tps": 0
                 },
                 {
-                    "name": "AUTORIZADOR LEGADO",
+                    "name": "AUTORIZADOR_LEGADO",
                     "qtd": dados_legado["qtd_aut"],
                     "valor": dados_legado["valor_aut"],
                     "qtd_neg": dados_legado["qtd_neg_aut"],
@@ -262,47 +182,49 @@ class AthenaReportDataProvider:
                 }
             ]}
 
-    def __data_process(self, query_by_status: str, query_get_estornos: str, query_get_advices: str) -> dict:
+    def __get_data(self, query_by_status: str, query_get_estornos: str, query_get_advices: str) -> dict:
         result_query_by_status = self.__execute_query(query_by_status)
         result_query_estornos = self.__execute_query(query_get_estornos)
         result_query_advices = self.__execute_query(query_get_advices)
 
-        qtd_apr_visa, valor_apr_visa, qtd_neg_visa, valor_neg_visa, qtd_apr_master, valor_apr_master, qtd_neg_master, valor_neg_master = self.__get_fields("status", "aprovado", "negado", result_query_by_status)
-        qtd_est_visa, valor_est_visa, qtd_est_master, valor_est_master = self.__get_fields("tipo", "estorno", None, result_query_estornos)
-        qtd_adv_visa, valor_adv_visa, qtd_adv_master, valor_adv_master = self.__get_fields("tipo", "advice", None, result_query_advices)
+        data_by_status = self.__get_fields("status", "aprovado", "negado", result_query_by_status)
+        data_estornos = self.__get_fields("tipo", "estorno", None, result_query_estornos)
+        data_advice = self.__get_fields("tipo", "advice", None, result_query_advices)
 
         return {
-            "qtd_visa": qtd_apr_visa + qtd_neg_visa,
-            "valor_visa": valor_apr_visa + valor_neg_visa,
-            "qtd_apr_visa": qtd_apr_visa,
-            "valor_apr_visa": valor_apr_visa,
-            "qtd_neg_visa": qtd_neg_visa,
-            "valor_neg_visa": valor_neg_visa,
-            "qtd_master": qtd_apr_master + qtd_neg_master,
-            "valor_master": valor_apr_master + valor_neg_master,
-            "qtd_apr_master": qtd_apr_master,
-            "valor_apr_master": valor_apr_master,
-            "qtd_neg_master": qtd_neg_master,
-            "valor_neg_master": valor_neg_master,
-            "qtd_est_visa": qtd_est_visa,
-            "valor_est_visa": valor_est_visa,
-            "qtd_est_master": qtd_est_master,
-            "valor_est_master": valor_est_master,
-            "qtd_adv_visa": qtd_adv_visa,
-            "valor_adv_visa": valor_adv_visa,
-            "qtd_adv_master": qtd_adv_master,
-            "valor_adv_master": valor_adv_master,
-            "qtd_apr_aut": qtd_apr_visa + qtd_apr_master,
-            "qtd_neg_aut": qtd_neg_visa + qtd_neg_master,
-            "qtd_est_aut": qtd_est_visa + qtd_est_master,
-            "qtd_adv_aut": qtd_adv_visa + qtd_adv_master,
-            "valor_apr_aut": valor_apr_visa + valor_apr_master,
-            "valor_neg_aut": valor_neg_visa + valor_neg_master,
-            "valor_aut": valor_apr_visa + valor_apr_master + valor_neg_visa + valor_neg_master,
-            "qtd_aut": qtd_apr_visa + qtd_apr_master + qtd_neg_visa + qtd_neg_master,
+            "qtd_visa": data_by_status["qtd_apr_visa"] + data_by_status["qtd_neg_visa"],
+            "valor_visa": data_by_status["valor_apr_visa"] + data_by_status["valor_neg_visa"],
+            "qtd_apr_visa": data_by_status["qtd_apr_visa"],
+            "valor_apr_visa": data_by_status["valor_apr_visa"],
+            "qtd_neg_visa": data_by_status["qtd_neg_visa"],
+            "valor_neg_visa": data_by_status["valor_neg_visa"],
+            "qtd_master": data_by_status["qtd_apr_master"] + data_by_status["qtd_neg_master"],
+            "valor_master": data_by_status["valor_apr_master"] + data_by_status["valor_neg_master"],
+            "qtd_apr_master": data_by_status["qtd_apr_master"],
+            "valor_apr_master": data_by_status["valor_apr_master"],
+            "qtd_neg_master": data_by_status["qtd_neg_master"],
+            "valor_neg_master": data_by_status["valor_neg_master"],
+            "qtd_est_visa": data_estornos["qtd_est_visa"],
+            "valor_est_visa": data_estornos["valor_est_visa"],
+            "qtd_est_master": data_estornos["qtd_est_master"],
+            "valor_est_master": data_estornos["valor_est_master"],
+            "qtd_adv_visa": data_advice["qtd_adv_visa"],
+            "valor_adv_visa": data_advice["valor_adv_visa"],
+            "qtd_adv_master": data_advice["qtd_adv_master"],
+            "valor_adv_master": data_advice["valor_adv_master"],
+            "qtd_apr_aut": data_by_status["qtd_apr_visa"] + data_by_status["qtd_apr_master"],
+            "qtd_neg_aut": data_by_status["qtd_neg_visa"] + data_by_status["qtd_neg_master"],
+            "qtd_est_aut": data_estornos["qtd_est_visa"] + data_estornos["qtd_est_master"],
+            "qtd_adv_aut": data_advice["qtd_adv_visa"] + data_advice["qtd_adv_master"],
+            "valor_apr_aut": data_by_status["valor_apr_visa"] + data_by_status["valor_apr_master"],
+            "valor_neg_aut": data_by_status["valor_neg_visa"] + data_by_status["valor_neg_master"],
+            "valor_aut": data_by_status["valor_apr_visa"] + data_by_status["valor_apr_master"] + data_by_status["valor_neg_visa"] + data_by_status["valor_neg_master"],
+            "qtd_aut": data_by_status["qtd_apr_visa"] + data_by_status["qtd_apr_master"] + data_by_status["qtd_neg_visa"] + data_by_status["qtd_neg_master"],
         }
 
-    def __execute_query(self, query) -> Dict[str, Any]:
+    def __execute_query(self, query:str) -> Dict[str, Any]:
+        logger.info(f"Executando query no Athena: {query}")
+
         try:
             response = self.athena.start_query_execution(
                 QueryString=query,
@@ -318,17 +240,18 @@ class AthenaReportDataProvider:
                     break
                 time.sleep(1)
 
-            # if status != 'SUCCEEDED':
-            #     raise Exception(f"Query falhou: {status}")
-
             result_response = self.athena.get_query_results(QueryExecutionId=execution_id)
+
+            rows = result_response["ResultSet"]["Rows"]
+            num_data_rows = len(rows) - 1
+            logger.info(f"Fim da execução da query. Quantidade de linhas retornadas: {num_data_rows}")
+
             return result_response
 
         except Exception as e:
-            # Qualquer outra exceção imprevista
+            logger.error(f"Erro ao executar query: {query}")
             logger.exception("Erro inesperado ao iniciar query Athena")
             self.stop()
-
     #            raise
 
     def stop(self):
@@ -359,12 +282,6 @@ class AthenaReportDataProvider:
         return parsed
 
     def __get_fields(self, key: str, value1: str, value2: str, raw: dict):
-        if raw is None:
-            if value2 is None:
-                return 0, 0, 0, 0
-            else:
-                return 0, 0, 0, 0, 0, 0, 0, 0
-
         data_parsed = self.__parse_athena(raw)
 
         data_map: dict[str, dict[str, dict]] = defaultdict(dict)
@@ -376,17 +293,29 @@ class AthenaReportDataProvider:
             valor_value1_visa = data_map.get("VISA", {}).get(value1, {}).get("valor_total", 0)
             qtd_value1_master = data_map.get("MASTERCARD", {}).get(value1, {}).get("quantidade", 0)
             valor_value1_master = data_map.get("MASTERCARD", {}).get(value1, {}).get("valor_total", 0)
-            return qtd_value1_visa, valor_value1_visa, qtd_value1_master, valor_value1_master
+            if value1 == 'estorno':
+                return {
+                    "qtd_est_visa": qtd_value1_visa,
+                    "valor_est_visa": valor_value1_visa,
+                    "qtd_est_master": qtd_value1_master,
+                    "valor_est_master": valor_value1_master}
+            else:
+                return {
+                    "qtd_adv_visa": qtd_value1_visa,
+                    "valor_adv_visa": valor_value1_visa,
+                    "qtd_adv_master": qtd_value1_master,
+                    "valor_adv_master": valor_value1_master}
 
-        qtd_value1_visa = data_map.get("VISA", {}).get(value1, {}).get("quantidade", 0)
-        valor_value1_visa = data_map.get("VISA", {}).get(value1, {}).get("valor_total", 0)
-        qtd_value1_master = data_map.get("MASTERCARD", {}).get(value1, {}).get("quantidade", 0)
-        valor_value1_master = data_map.get("MASTERCARD", {}).get(value1, {}).get("valor_total", 0)
-        qtd_value2_visa = data_map.get("VISA", {}).get(value2, {}).get("quantidade", 0)
-        valor_value2_visa = data_map.get("VISA", {}).get(value2, {}).get("valor_total", 0)
-        qtd_value2_master = data_map.get("MASTERCARD", {}).get(value2, {}).get("quantidade", 0)
-        valor_value2_master = data_map.get("MASTERCARD", {}).get(value2, {}).get("valor_total", 0)
-        return qtd_value1_visa, valor_value1_visa, qtd_value2_visa, valor_value2_visa, qtd_value1_master, valor_value1_master, qtd_value2_master, valor_value2_master
+        return {
+            "qtd_apr_visa": data_map.get("VISA", {}).get(value1, {}).get("quantidade", 0),
+            "valor_apr_visa": data_map.get("VISA", {}).get(value1, {}).get("valor_total", 0),
+            "qtd_neg_visa": data_map.get("VISA", {}).get(value2, {}).get("quantidade", 0),
+            "valor_neg_visa": data_map.get("VISA", {}).get(value2, {}).get("valor_total", 0),
+            "qtd_apr_master": data_map.get("MASTERCARD", {}).get(value1, {}).get("quantidade", 0),
+            "valor_apr_master": data_map.get("MASTERCARD", {}).get(value1, {}).get("valor_total", 0),
+            "qtd_neg_master": data_map.get("MASTERCARD", {}).get(value2, {}).get("quantidade", 0),
+            "valor_neg_master": data_map.get("MASTERCARD", {}).get(value2, {}).get("valor_total", 0)
+        }
 
     def __get_pico_tps(self, raw: dict):
         data_parsed = self.__parse_athena(raw)
@@ -398,6 +327,6 @@ class AthenaReportDataProvider:
             dt = datetime.fromisoformat(data_hora)
             hora = dt.strftime("%H:%M:%S")
         except ValueError:
-            hora = "xx:xx:xx"
+            hora = "hh:mm:ss"
 
         return f"{pico_tps} - {hora}"

@@ -1,5 +1,5 @@
 TABLE_TEMPLATE = """
-                                                   |           QTD         |            VALOR               |     QTD APR.      |       VALOR APR.          |     QTD NEG.      |       VALOR NEG.          |    QTD EST.        |     QTD ADV.      |      PICO TP	S
+                                                   |    QTD TOT.       |            VALOR TOT.       |     QTD APR.      |       VALOR APR.          |     QTD NEG.      |       VALOR NEG.          |    QTD EST.        |     QTD ADV.      |      PICO TP	S
 - - - - - - - - - - - - - - - - - - - - - -|- - - - - - - - - - - - |- - - - - - - - - - - - - - - - -|- - - - - - - - - - - - |- - - - - - - - - - - - - - - - -|- - - - - - - - - - - - |- - - - - - - - - - - - - - - - -|- - - - - - - - - - - - |- - - - - - - - - - - - |- - - - - - - - - - - - - 
 Geral                                         |  ${a1}  |  ${b1}  |  ${c1}  |  ${d1}  |  ${e1}  |  ${f1}  |  ${g1}  |  ${h1}  |  ${i1} 
 Modernizado                          |  ${a2}  |  ${b2}  |  ${c2}  |  ${d2}  |  ${e2}  |  ${f2}  |  ${g2}  |  ${h2}  |  ${i2}
@@ -12,5 +12,5 @@ Visa – Modernizado              |  ${a8}  |  ${b8}  |  ${c8}  |  ${d8}  |  ${e
 Visa – Legado                         |  ${a9}  |  ${b9}  |  ${c9}  |  ${d9}  |  ${e9}  |  ${f9}  |  ${g9}  |  ${h9}  |  ${i9} 
 Autorizador Presente           |  ${a10}  |  ${b10}  |  ${c10}  |  ${d10}  |  ${e10}  |  ${f10}  |  ${g10}  |  ${h10}  |  ${i10} 
 Autorizador Digital               |  ${a11}  |  ${b11}  |  ${c11}  |  ${d11}  |  ${e11}  |  ${f11}  |  ${g11}  |  ${h11}  |  ${i11}
-Autorizador Legado              |  ${a12}  |  ${b12}  |  ${c12}  |  ${d12}  |  ${e12}  |  ${f12}  |  ${g12}  |  ${h12}  |  ${i12} 
+Autorizador Legado              |  ${a12}  |  ${b12}  |  ${c12}  |  ${d12}  |  ${e12}  |  ${f12}  |  ${g12}  |  ${h12}  |  ${i12}
 """

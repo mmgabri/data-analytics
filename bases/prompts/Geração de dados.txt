@@ -1,5 +1,5 @@
 Gere um csv (separado por ponto e virgula) contendo 1000 linhas contendo dados aleatórios transacionais com os campos abaixo:
-- data , no formato aaaa-mm-dd. Deve ser entre 2025-07-004 e 2025-07-05
+- data , no formato dd-mm-aaaa. Deve ser entre 2025-07-004 e 2025-07-05
 - hora, no formato hh:mm:ss
 - valor, com 12 posicoes alinhando com zeros a esquerda (sem ponto ou virgula). Deve ser entre 1 e 100000 (1 mil  reais)
 - status, 90% "aprovado" e 10% "negado"
@@ -12,3 +12,5 @@ Gere um csv (separado por ponto e virgula) contendo 1000 linhas contendo dados a
 - transaction_id, gerar um uuid randômico
 - data_hora no formatado 2025-07-11T11:53:46Z. A data deve corresponder (ser igual) ao outro campo data
 - reason_code variando entre 402, 490 e 120. Incluir isso apenas para somente  transações do tipo estorno ou advice. 
+
+Retira o header (nome das colunas, deixando apenas os dados)

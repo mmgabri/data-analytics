@@ -1,6 +1,5 @@
-# use_case_transaction_report.py
-
 import logging
+from datetime import date, timedelta
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -12,9 +11,16 @@ class UseCaseTransactionReport:
 
     def execute(self):
         logger.info("UseCaseRelatorio: iniciando execução…")
-        data = self.data_provider.execute()
-        rows = data.get("rows", [])
+
+        yesterday = date.today() - timedelta(days=1)
+        date_formatted = yesterday.strftime("%m-%d-%Y")
+        logger.info(yesterday)
+        #data = self.data_provider.execute(date_formatted)
+        transaction_data = self.data_provider.execute('05-07-2025')
+
+        rows = transaction_data.get("rows", [])
         if not rows:
             logger.warning("Nenhuma linha retornada pelo provider!")
-        self.email_sender.send(rows)
-        logger.info("UseCaseRelatorio: finalizado.")
+
+        self.email_sender.execute(rows)
+        logger.info("UseCaseTransactionReport finalizado com sucesso!")
