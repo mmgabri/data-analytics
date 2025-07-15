@@ -22,5 +22,5 @@ class UseCaseTransactionReport:
         if not rows:
             logger.warning("Nenhuma linha retornada pelo provider!")
 
-        self.email_sender.execute(rows)
+        self.email_sender.execute(transaction_data)
         logger.info("UseCaseTransactionReport finalizado com sucesso!")
