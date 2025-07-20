@@ -1,27 +1,29 @@
 Gere um csv (separado por ponto e virgula) contendo 1000 linhas contendo dados aleatórios transacionais com os campos abaixo:
-- dia_mes_ano , no formato dd-mm-aaaa. Deve ser entre 2025-07-004 e 2025-07-05
-- hora, no formato hh:mm:ss
-- valor, com 12 posicoes alinhando com zeros a esquerda (sem ponto ou virgula). Deve ser entre 1 e 100000 (1 mil  reais)
-- status, 90% "aprovado" e 10% "negado"
-- tipo 90% "financeira" , 1% "acerto", "4% "estorno" , 5% "advice"
-- numero_cartao, numérico com 16 posicoes
-- nome_produto , dividir em compra_nacional_chip_senha, compra_nacional_contactless_sem_senha, compra_nacional_contactless_com_senha
-- codigo_erro , numérico com 3 posicoes . Se status aprovado, deve ser "000"
-- código_retorno, numerico com 2 posicoes. Se status aprovado, deve ser "00", senão variar entre 51, 55, 75, 14, 57, 85, 63, 96, 91 e 58
-- desc_erro, se código_retorno:
+- dia_mes_ano :  no formato dd-mm-aaaa. Deve ser entre 2025-07-004 e 2025-07-05
+- hora:  no formato hh:mm:ss
+- valor:  com 12 posicoes alinhando com zeros a esquerda (sem ponto ou virgula). Deve ser entre 1 e 100000 (1 mil  reais)
+- status:  90% "aprovado" e 10% "negado"
+- tipo:  90% "financeira" , 1% "acerto", "4% "estorno" , 5% "advice"
+- numero_cartao:  numérico com 16 posicoes
+- nome_produto:  dividir em compra_nacional_chip_senha, compra_nacional_contactless_sem_senha, compra_nacional_contactless_com_senha
+- codigo_erro:  numérico com 3 posicoes . Se status aprovado, deve ser "000"
+- código_retorno:  numerico com 2 posicoes. Se status aprovado, deve ser "00", senão variar entre 51, 55, 75, 14, 57, 85, 63, 96, 91 e 58
+- desc_erro:  se código_retorno:
 	51 - Sal insuficiente
-	63 - Limite excedido  
 	55 - Senha invalida
 	75 - Senha bloqueada
 	14 - Cartão invalido
 	57 - Transação não permitida para o emissor
 	85 - Transação ok
+    63 - Limite excedido  
 	96 - Favor repetir a operação
 	91 - Timeout
-	57 - Transação não permitida para o adquirente
-- bandeira, deve ser MASTERCARD (70%) e VISA (30%)
-- transaction_id, gerar um uuid randômico
-- data_hora no formatado 2025-07-11T11:53:46Z. A data deve corresponder (ser igual) ao outro campo data
-- reason_code variando entre 402, 490 e 120. Incluir isso apenas para somente  transações do tipo estorno ou advice. 
+	58 - Transação não permitida para o adquirente
+- bandeira:  deve ser MASTERCARD (70%) e VISA (30%)
+- transaction_id: gerar um uuid randômico
+- data_hora no formatado:  2025-07-11T11:53:46Z. A data deve corresponder (ser igual) ao outro campo data
+- reason_code:  variando entre 402, 490 e 120. Incluir isso apenas para somente  transações do tipo estorno ou advice. 
+- tipo_pessoa: PJ (5%) / PF (95%)
+- plataforma: DUAL_MESSAGE (5%) / SINGLE_MESSAGE (95%)
 
 Retira o header (nome das colunas, deixando apenas os dados)

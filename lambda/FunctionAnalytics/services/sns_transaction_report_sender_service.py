@@ -1,11 +1,12 @@
 import logging
 from string import Template
 from typing import Union
+import re
 
 import boto3
 
-from FunctionAnalytics.utils.spacing_config_report import (SPACING_CONFIG, QTD_FIELDS, VALOR_FIELDS)
-from FunctionAnalytics.utils.table_template_report import TABLE_TEMPLATE
+from FunctionAnalytics.utils.spacing_config_report import (SPACING_CONFIG, QTD_FIELDS, VALOR_FIELDS, PERCENT)
+from FunctionAnalytics.utils.transaction_report_template import TRANSACTION_REPORT_TEMPLATE
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -15,7 +16,7 @@ class SnsTransactionReportSender:
     def __init__(self, topic_arn: str):
         self.topic_arn = topic_arn
         self.sns = boto3.client("sns")
-        self.template = Template(TABLE_TEMPLATE)
+        self.template = Template(TRANSACTION_REPORT_TEMPLATE)
 
     def execute(self, transaction_data):
         logger.info("Montando corpo do email…")
@@ -26,12 +27,13 @@ class SnsTransactionReportSender:
 
         subs = self.build_subs(rows, top_10_erro, date_base)
         body = self.template.substitute(subs)
+        body = self.clean_empty_pipe_lines(body)
 
         logger.info("Enviando pelo SNS…")
         self.sns.publish(
             TopicArn=self.topic_arn,
             Message=body,
-            Subject='Relatório Transacional',
+            Subject='[AUTORIZADOR DÉBITO] Relatório Transacional diário',
             MessageStructure='raw'
         )
 
@@ -46,15 +48,14 @@ class SnsTransactionReportSender:
         # BIG NUMBERS
         for idx, row in enumerate(rows, start=start_index):
             cols = {
-                'a': ("qtd", self.format_int),
-                'b': ("valor", self.format_currency),
-                'c': ("qtd_apr", self.format_int),
-                'd': ("valor_apr", self.format_currency),
-                'e': ("qtd_neg", self.format_int),
-                'f': ("valor_neg", self.format_currency),
-                'g': ("qtd_est", self.format_int),
-                'h': ("qtd_adv", self.format_int),
-                'i': ("tps", lambda x: str(x))
+                'a': ("percent", lambda x: str(x)),
+                'b': ("qtd", self.format_int),
+                'c': ("valor", self.format_currency),
+                'd': ("qtd_apr", self.format_int),
+                'e': ("valor_apr", self.format_currency),
+                'f': ("qtd_neg", self.format_int),
+                'g': ("valor_neg", self.format_currency),
+                'h': ("tps", lambda x: str(x))
             }
             for col_key, (field, fmt) in cols.items():
                 raw = fmt(row[field])
@@ -63,6 +64,8 @@ class SnsTransactionReportSender:
                     cfg = SPACING_CONFIG["qtd"]
                 elif field in VALOR_FIELDS:
                     cfg = SPACING_CONFIG["valor"]
+                elif field in PERCENT:
+                    cfg = SPACING_CONFIG["percent"]
                 else:
                     cfg = None
 
@@ -109,6 +112,7 @@ class SnsTransactionReportSender:
 
             subs[f"c{idx}"] = err["desc"]
 
+
     @staticmethod
     def format_int(n) -> str:
         if n == '-':
@@ -118,6 +122,7 @@ class SnsTransactionReportSender:
         except (TypeError, ValueError):
             return str(n)
         return f"{num:,}".replace(",", ".")
+
 
     @staticmethod
     def format_currency(v: Union[int, float, str]) -> str:
@@ -134,13 +139,29 @@ class SnsTransactionReportSender:
 
         return f"R$ {s}"
 
+
     @staticmethod
     def pad_center(raw: str, total_spaces: int, pad_char: str) -> str:
         if raw == '-':
-            total_spaces2 = total_spaces + 2
+            total_spaces2 = total_spaces + 1
         else:
             total_spaces2 = total_spaces
 
         left = total_spaces2 // 2 + (total_spaces2 % 2)
         right = total_spaces2 // 2
         return f"{pad_char * left}{raw}{pad_char * right}"
+
+    def clean_empty_pipe_lines(self, rendered_text: str) -> str:
+        """
+        Substitui '|' por ' ' em qualquer linha que seja composta apenas por
+        pipes e espaços (ex: '    |    |   ').
+        """
+        linhas = rendered_text.splitlines()
+        novas = []
+        for linha in linhas:
+            # detecta linhas que têm só espaços e pipes
+            if re.fullmatch(r'[ \t]*\|[ \t]*\|[ \t]*', linha):
+                # troca todos os '|' por espaço
+                linha = linha.replace('|', ' ')
+            novas.append(linha)
+        return "\n".join(novas)

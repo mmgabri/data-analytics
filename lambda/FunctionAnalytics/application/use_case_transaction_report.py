@@ -16,7 +16,7 @@ class UseCaseTransactionReport:
         date_formatted = yesterday.strftime("%m-%d-%Y")
         logger.info(yesterday)
         #data = self.data_provider.execute(date_formatted)
-        transaction_data = self.data_provider.execute('05-07-2025')
+        transaction_data = self.data_provider.execute('04-07-2025')
 
         rows = transaction_data.get("rows", [])
         if not rows:
